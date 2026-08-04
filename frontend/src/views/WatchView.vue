@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useMovieStore } from '../stores/movies'
+import { kh } from '../i18n/kh'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,7 +80,7 @@ function toggleFullscreen() {
 <template>
   <div class="relative min-h-screen bg-black" @mousemove="revealControls">
     <div v-if="!movie" class="flex min-h-screen items-center justify-center text-white/60">
-      Loading player...
+      {{ kh.loadingShort }}
     </div>
 
     <template v-else>
@@ -96,8 +97,8 @@ function toggleFullscreen() {
           v-if="movie.subtitle_url"
           kind="subtitles"
           :src="movie.subtitle_url"
-          srclang="en"
-          label="English"
+          srclang="km"
+          label="ខ្មែរ"
           default
         />
       </video>
@@ -111,7 +112,7 @@ function toggleFullscreen() {
       />
 
       <div v-else class="flex min-h-screen items-center justify-center text-white/70">
-        No video available for this title.
+        មិនមានវីដេអូសម្រាប់ចំណងជើងនេះ។
       </div>
 
       <div
@@ -119,19 +120,19 @@ function toggleFullscreen() {
         :class="showControls ? 'opacity-100' : 'opacity-0'"
       >
         <div class="pointer-events-auto flex items-center gap-4">
-          <button class="rounded bg-white/10 px-3 py-2 text-sm" @click="router.back()">← Back</button>
+          <button class="rounded bg-white/10 px-3 py-2 text-sm" @click="router.back()">← ត្រឡប់</button>
           <div>
             <h1 class="text-lg font-semibold">{{ movie.title }}</h1>
-            <p class="text-xs text-white/60">Continue watching enabled</p>
+            <p class="text-xs text-white/60">{{ kh.continueWatching }}</p>
           </div>
           <button class="ml-auto rounded bg-white/10 px-3 py-2 text-sm" @click="toggleFullscreen">
-            Fullscreen
+            ពេញអេក្រង់
           </button>
           <RouterLink
             :to="{ name: 'movie', params: { id: movie.slug || movie.id } }"
             class="rounded bg-white/10 px-3 py-2 text-sm"
           >
-            Details
+            {{ kh.moreInfo }}
           </RouterLink>
         </div>
       </div>
