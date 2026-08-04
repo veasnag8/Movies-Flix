@@ -2,11 +2,17 @@
 
 namespace App\Services;
 
+use Google\Http\MediaFileUpload;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Http\UploadedFile;
+use RuntimeException;
 
 class GoogleDriveService
 {
+    private const SMALL_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+
+    private const CHUNK_BYTES = 1 * 1024 * 1024; // 1MB chunks
+
     public function __construct(protected GoogleClientFactory $google)
     {
     }
@@ -29,15 +35,25 @@ class GoogleDriveService
     {
         $folderId = $folderId ?: config('google.drive_folder_id');
         $drive = $this->google->drive();
+        $client = $drive->getClient();
 
         if ($file instanceof UploadedFile) {
             $name = $name ?: $file->getClientOriginalName();
-            $mimeType = $mimeType ?: $file->getMimeType();
+            $mimeType = $mimeType ?: $file->getMimeType() ?: 'application/octet-stream';
             $path = $file->getRealPath();
         } else {
             $path = $file;
             $name = $name ?: basename($path);
             $mimeType = $mimeType ?: mime_content_type($path) ?: 'application/octet-stream';
+        }
+
+        if (! is_string($path) || ! is_readable($path)) {
+            throw new RuntimeException('Upload file path is not readable.');
+        }
+
+        $size = filesize($path);
+        if ($size === false) {
+            throw new RuntimeException('Unable to read upload file size.');
         }
 
         $metadata = new DriveFile([
@@ -48,17 +64,62 @@ class GoogleDriveService
             $metadata->setParents([$folderId]);
         }
 
-        $created = $drive->files->create($metadata, [
-            'data' => fopen($path, 'r'),
-            'mimeType' => $mimeType,
-            'uploadType' => 'multipart',
-            'fields' => 'id,name,mimeType,webViewLink,webContentLink,size',
-        ]);
+        // Small files: simple multipart with string body
+        if ($size <= self::SMALL_FILE_BYTES) {
+            $created = $drive->files->create($metadata, [
+                'data' => file_get_contents($path),
+                'mimeType' => $mimeType,
+                'uploadType' => 'multipart',
+                'fields' => 'id,name,mimeType,webViewLink,webContentLink,size',
+            ]);
+        } else {
+            // Large files: resumable chunked upload (avoids base64_encode on resource)
+            $client->setDefer(true);
+            $request = $drive->files->create($metadata, [
+                'fields' => 'id,name,mimeType,webViewLink,webContentLink,size',
+            ]);
+
+            $media = new MediaFileUpload(
+                $client,
+                $request,
+                $mimeType,
+                null,
+                true,
+                self::CHUNK_BYTES
+            );
+            $media->setFileSize($size);
+
+            $status = false;
+            $handle = fopen($path, 'rb');
+            if ($handle === false) {
+                $client->setDefer(false);
+                throw new RuntimeException('Unable to open upload file.');
+            }
+
+            try {
+                while (! $status && ! feof($handle)) {
+                    $chunk = fread($handle, self::CHUNK_BYTES);
+                    if ($chunk === false) {
+                        throw new RuntimeException('Failed reading upload chunk.');
+                    }
+                    $status = $media->nextChunk($chunk);
+                }
+            } finally {
+                fclose($handle);
+                $client->setDefer(false);
+            }
+
+            if (! $status instanceof DriveFile) {
+                throw new RuntimeException('Drive resumable upload did not return a file.');
+            }
+
+            $created = $status;
+        }
 
         $this->makePublic($created->getId());
 
         $id = $created->getId();
-        $isImage = str_starts_with((string) $created->getMimeType(), 'image/');
+        $isImage = str_starts_with((string) ($created->getMimeType() ?: $mimeType), 'image/');
 
         return [
             'id' => $id,
