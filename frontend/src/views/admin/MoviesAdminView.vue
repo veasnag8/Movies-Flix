@@ -347,7 +347,7 @@ onMounted(load)
             />
             <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-flix-red/20 text-xl text-flix-red">▶</div>
             <p class="font-semibold">1. វីដេអូ / Video</p>
-            <p class="mt-1 text-xs text-white/50">MP4, MKV, MOV — upload to Google Drive</p>
+            <p class="mt-1 text-xs text-white/50">MP4, MKV, MOV — up to ~1GB (small files more reliable on free hosting)</p>
             <p v-if="videoName" class="mt-3 truncate rounded bg-white/10 px-2 py-1 text-xs text-flix-gold-soft">
               ✓ {{ videoName }}
             </p>
