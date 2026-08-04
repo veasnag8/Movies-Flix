@@ -26,7 +26,7 @@ onMounted(async () => {
 <template>
   <div>
     <h1 class="text-3xl font-semibold">Dashboard</h1>
-    <p class="mt-1 text-white/60">Manage Movies Flix KH content stored in Google Sheets.</p>
+    <p class="mt-1 text-white/60">គ្រប់គ្រងមាតិកា Movies Flix KH នៅក្នុង Google Sheets។</p>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-3">
       <div class="rounded-sm border border-white/10 bg-neutral-900 p-5">

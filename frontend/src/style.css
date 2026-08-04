@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-flix-red: #e50914;
-  --color-flix-red-dark: #b20710;
-  --color-flix-black: #141414;
-  --color-flix-dark: #0b0b0b;
-  --color-flix-gray: #808080;
-  --color-flix-card: #1a1a1a;
-  --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
-  --font-body: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Cambodia-inspired cinema palette */
+  --color-flix-red: #c8102e;
+  --color-flix-red-dark: #9a0c23;
+  --color-flix-gold: #d4af37;
+  --color-flix-gold-soft: #e8d48b;
+  --color-flix-blue: #032ea1;
+  --color-flix-black: #0c0a09;
+  --color-flix-dark: #080706;
+  --color-flix-gray: #9a8f84;
+  --color-flix-card: #161210;
+  --font-display: "Koulen", "Moul", sans-serif;
+  --font-body: "Hanuman", "Battambang", "Noto Sans Khmer", sans-serif;
 }
 
 * {
@@ -23,10 +27,33 @@ body,
 
 body {
   margin: 0;
-  background: var(--color-flix-dark);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 16, 46, 0.22), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 100% 0%, rgba(212, 175, 55, 0.08), transparent 40%),
+    var(--color-flix-dark);
   color: #fff;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle Khmer-inspired geometric wash (kbach-like lattice) */
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.04;
+  background-image:
+    linear-gradient(30deg, #d4af37 1px, transparent 1px),
+    linear-gradient(150deg, #d4af37 1px, transparent 1px),
+    linear-gradient(90deg, transparent 48%, rgba(200, 16, 46, 0.5) 49%, transparent 51%);
+  background-size: 48px 48px, 48px 48px, 96px 96px;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
 }
 
 a {
@@ -40,7 +67,7 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: linear-gradient(180deg, #c8102e, #d4af37);
   border-radius: 999px;
 }
 
@@ -84,4 +111,36 @@ a {
   to {
     transform: scale(1.08);
   }
+}
+
+.brand-mark {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-mark .latin {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  color: var(--color-flix-red);
+}
+
+.brand-mark .khmer {
+  margin-top: 0.15rem;
+  font-family: var(--font-body);
+  font-size: 0.55em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-flix-gold);
+}
+
+.gold-line {
+  height: 2px;
+  width: 4rem;
+  background: linear-gradient(90deg, var(--color-flix-gold), transparent);
+}
+
+.kh-panel {
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.15), 0 24px 60px rgba(0, 0, 0, 0.55);
 }

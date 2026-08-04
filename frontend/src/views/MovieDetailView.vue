@@ -4,6 +4,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import MovieRow from '../components/MovieRow.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMovieStore } from '../stores/movies'
+import { kh } from '../i18n/kh'
 
 const route = useRoute()
 const router = useRouter()
@@ -43,7 +44,7 @@ const isFavorite = computed(() =>
 <template>
   <div class="min-h-screen pb-16">
     <div v-if="store.loading && !movie" class="flex min-h-screen items-center justify-center text-white/60">
-      Loading...
+      {{ kh.loadingShort }}
     </div>
 
     <template v-else-if="movie">
@@ -83,35 +84,35 @@ const isFavorite = computed(() =>
               class="rounded bg-flix-red px-6 py-3 text-sm font-bold uppercase tracking-wide hover:bg-flix-red-dark"
               @click="watchNow"
             >
-              Watch Now
+              {{ kh.watchNow }}
             </button>
             <button
               class="rounded bg-white/15 px-6 py-3 text-sm font-semibold hover:bg-white/25"
               @click="onFavorite"
             >
-              {{ isFavorite ? '✓ In My List' : '+ My List' }}
+              {{ isFavorite ? kh.inMyList : kh.addMyList }}
             </button>
             <a
               v-if="movie.trailer_url"
               :href="movie.trailer_url"
               target="_blank"
               rel="noopener"
-              class="rounded border border-white/30 px-6 py-3 text-sm font-semibold hover:bg-white/10"
+              class="rounded border border-flix-gold/40 px-6 py-3 text-sm font-semibold text-flix-gold-soft hover:bg-flix-gold/10"
             >
-              Trailer
+              {{ kh.trailer }}
             </a>
           </div>
         </div>
       </div>
 
       <div class="mt-12">
-        <MovieRow title="More Like This" :movies="store.related" />
+        <MovieRow :title="kh.moreLikeThis" :movies="store.related" />
       </div>
     </template>
 
     <div v-else class="flex min-h-screen flex-col items-center justify-center gap-4">
-      <p class="text-white/70">{{ store.error || 'Movie not found' }}</p>
-      <RouterLink to="/" class="text-flix-red">Back home</RouterLink>
+      <p class="text-white/70">{{ store.error || kh.movieNotFound }}</p>
+      <RouterLink to="/" class="text-flix-red">{{ kh.backHome }}</RouterLink>
     </div>
   </div>
 </template>
