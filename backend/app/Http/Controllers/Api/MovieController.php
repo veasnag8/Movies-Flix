@@ -126,9 +126,11 @@ class MovieController extends Controller
 
     protected function googleError(\Throwable $e)
     {
+        report($e);
+
         return response()->json([
             'message' => 'Unable to reach Google Sheets. Check API credentials.',
-            'error' => config('app.debug') ? $e->getMessage() : null,
+            'error' => $e->getMessage(),
             'data' => [],
         ], 503);
     }
