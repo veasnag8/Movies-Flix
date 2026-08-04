@@ -1,12 +1,26 @@
 <script setup>
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
-defineProps({
+const props = defineProps({
   movie: {
     type: Object,
     required: true,
   },
 })
+
+function toThumb(url) {
+  if (!url) return ''
+  const driveId =
+    url.match(/[?&]id=([^&]+)/)?.[1] ||
+    url.match(/\/d\/([^/]+)/)?.[1]
+  if (driveId && url.includes('drive.google.com')) {
+    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w400`
+  }
+  return url
+}
+
+const thumb = computed(() => toThumb(props.movie.poster_url || props.movie.banner_url || ''))
 </script>
 
 <template>
@@ -16,8 +30,8 @@ defineProps({
   >
     <div class="aspect-[2/3] overflow-hidden bg-neutral-900">
       <img
-        v-if="movie.poster_url"
-        :src="movie.poster_url"
+        v-if="thumb"
+        :src="thumb"
         :alt="movie.title"
         class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
         loading="lazy"

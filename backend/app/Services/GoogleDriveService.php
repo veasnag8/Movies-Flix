@@ -57,14 +57,18 @@ class GoogleDriveService
 
         $this->makePublic($created->getId());
 
+        $id = $created->getId();
+        $isImage = str_starts_with((string) $created->getMimeType(), 'image/');
+
         return [
-            'id' => $created->getId(),
+            'id' => $id,
             'name' => $created->getName(),
             'mime_type' => $created->getMimeType(),
             'size' => $created->getSize(),
-            'url' => $this->getStreamingUrl($created->getId()),
-            'view_url' => 'https://drive.google.com/file/d/'.$created->getId().'/view',
-            'preview_url' => 'https://drive.google.com/file/d/'.$created->getId().'/preview',
+            'url' => $isImage ? $this->getThumbnailUrl($id) : $this->getStreamingUrl($id),
+            'thumbnail_url' => $this->getThumbnailUrl($id),
+            'view_url' => 'https://drive.google.com/file/d/'.$id.'/view',
+            'preview_url' => 'https://drive.google.com/file/d/'.$id.'/preview',
         ];
     }
 
@@ -82,6 +86,14 @@ class GoogleDriveService
     public function getStreamingUrl(string $fileId): string
     {
         return 'https://drive.google.com/uc?id='.$fileId.'&export=download';
+    }
+
+    /**
+     * Public image URL that works in <img> tags (unlike uc?export=download).
+     */
+    public function getThumbnailUrl(string $fileId, int $width = 800): string
+    {
+        return 'https://drive.google.com/thumbnail?id='.$fileId.'&sz=w'.$width;
     }
 
     public function getEmbedUrl(string $fileId): string
