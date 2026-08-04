@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { kh } from '../i18n/kh'
@@ -7,6 +7,7 @@ import { kh } from '../i18n/kh'
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const showPassword = ref(false)
 
 const form = reactive({
   email: '',
@@ -42,12 +43,21 @@ async function submit() {
       />
 
       <label class="mt-4 block text-sm text-flix-gold-soft/80">{{ kh.password }}</label>
-      <input
-        v-model="form.password"
-        type="password"
-        required
-        class="mt-1 w-full rounded border border-white/10 bg-neutral-900 px-3 py-3 outline-none focus:border-flix-gold"
-      />
+      <div class="relative mt-1">
+        <input
+          v-model="form.password"
+          :type="showPassword ? 'text' : 'password'"
+          required
+          class="w-full rounded border border-white/10 bg-neutral-900 px-3 py-3 pr-20 outline-none focus:border-flix-gold"
+        />
+        <button
+          type="button"
+          class="absolute inset-y-0 right-0 px-3 text-xs text-flix-gold-soft hover:text-flix-gold"
+          @click="showPassword = !showPassword"
+        >
+          {{ showPassword ? kh.hidePassword : kh.showPassword }}
+        </button>
+      </div>
 
       <p v-if="auth.error" class="mt-3 text-sm text-red-400">{{ auth.error }}</p>
 

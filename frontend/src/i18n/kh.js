@@ -35,6 +35,8 @@ export const kh = {
   password: 'ពាក្យសម្ងាត់',
   name: 'ឈ្មោះ',
   confirmPassword: 'បញ្ជាក់ពាក្យសម្ងាត់',
+  showPassword: 'បង្ហាញ',
+  hidePassword: 'លាក់',
   signingIn: 'កំពុងចូល...',
   creatingAccount: 'កំពុងបង្កើតគណនី...',
   createAccount: 'បង្កើតគណនី',
