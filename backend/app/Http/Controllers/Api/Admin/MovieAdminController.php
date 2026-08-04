@@ -42,7 +42,7 @@ class MovieAdminController extends Controller
             'trailer_url' => 'nullable|string',
             'subtitle_url' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,draft',
-            'video' => 'nullable|file|max:524288',
+            'video' => 'nullable|file|max:1048576',
             'poster' => 'nullable|image|max:10240',
             'banner' => 'nullable|image|max:10240',
         ]);
@@ -104,7 +104,7 @@ class MovieAdminController extends Controller
             'trailer_url' => 'nullable|string',
             'subtitle_url' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,draft',
-            'video' => 'nullable|file|max:524288',
+            'video' => 'nullable|file|max:1048576',
             'poster' => 'nullable|image|max:10240',
             'banner' => 'nullable|image|max:10240',
         ]);
@@ -183,7 +183,7 @@ class MovieAdminController extends Controller
     public function uploadVideo(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'video' => 'required|file|max:524288',
+            'video' => 'required|file|max:1048576',
         ]);
 
         if ($validator->fails()) {
