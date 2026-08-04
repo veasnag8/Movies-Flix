@@ -58,9 +58,11 @@ class AuthController extends Controller
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 401);
         } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'message' => 'Login failed.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage(),
             ], 500);
         }
 

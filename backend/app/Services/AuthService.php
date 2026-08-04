@@ -76,8 +76,20 @@ class AuthService
     {
         $sheetUser = $this->sheets->getUserByEmail($email);
 
-        if (! $sheetUser || ! Hash::check($password, $sheetUser['password'] ?? '')) {
+        if (! $sheetUser) {
             throw new \InvalidArgumentException('Invalid email or password.');
+        }
+
+        $hash = $this->normalizePasswordHash((string) ($sheetUser['password'] ?? ''));
+
+        if ($hash === '' || ! Hash::check($password, $hash)) {
+            throw new \InvalidArgumentException('Invalid email or password.');
+        }
+
+        // Keep a valid bcrypt hash in the sheet if Sheets stripped the leading "$"
+        if ($hash !== ($sheetUser['password'] ?? '')) {
+            $this->sheets->updateUser($sheetUser['id'], ['password' => $hash]);
+            $sheetUser['password'] = $hash;
         }
 
         $user = $this->syncLocalUser($sheetUser);
@@ -88,5 +100,19 @@ class AuthService
             'user' => $user->toPublicArray(),
             'token' => $token,
         ];
+    }
+
+    /**
+     * Google Sheets often strips a leading "$" from bcrypt hashes.
+     */
+    protected function normalizePasswordHash(string $hash): string
+    {
+        $hash = trim($hash);
+
+        if ($hash !== '' && ! str_starts_with($hash, '$') && str_starts_with($hash, '2y$')) {
+            return '$'.$hash;
+        }
+
+        return $hash;
     }
 }
