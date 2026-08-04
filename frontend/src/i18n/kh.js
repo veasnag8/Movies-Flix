@@ -1,7 +1,7 @@
 /** Khmer UI copy for Movies Flix KH */
 export const kh = {
   brand: 'MOVIES FLIX KH',
-  brandKh: 'មូវី ហ្វ្លិច ខេឆ',
+  brandKh: 'មូវី ហ្វ្លិច ខេអេច',
   tagline: 'មើលភាពយន្តខ្មែរ និងអន្តរជាតិ',
 
   home: 'ទំព័រដើម',
