@@ -33,7 +33,12 @@ export const useAuthStore = defineStore('auth', () => {
       persist(data.user, data.token)
       return data
     } catch (e) {
-      error.value = e.response?.data?.message || 'Login failed'
+      error.value =
+        e.response?.data?.message ||
+        e.response?.data?.error ||
+        (e.code === 'ECONNABORTED' ? 'Server timeout. Try again.' : null) ||
+        e.message ||
+        'Login failed'
       throw e
     } finally {
       loading.value = false
