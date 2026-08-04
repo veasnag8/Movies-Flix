@@ -14,12 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wake Render API
+        env:
+          RENDER_HEALTH_URL: https://movies-flix-kh.onrender.com/up
         run: |
           set -e
-          URL="${{ vars.RENDER_HEALTH_URL || 'https://movies-flix-kh.onrender.com/up' }}"
-          echo "Pinging $URL"
+          echo "Pinging $RENDER_HEALTH_URL"
           for i in 1 2 3; do
-            if curl -fsS --max-time 90 "$URL" >/tmp/render-health.txt; then
+            if curl -fsS --max-time 90 "$RENDER_HEALTH_URL" -o /tmp/render-health.txt; then
               echo "OK (attempt $i)"
               head -c 200 /tmp/render-health.txt || true
               echo
