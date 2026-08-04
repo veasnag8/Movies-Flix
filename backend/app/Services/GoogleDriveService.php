@@ -49,7 +49,7 @@ class GoogleDriveService
         }
 
         $created = $drive->files->create($metadata, [
-            'data' => file_get_contents($path),
+            'data' => fopen($path, 'r'),
             'mimeType' => $mimeType,
             'uploadType' => 'multipart',
             'fields' => 'id,name,mimeType,webViewLink,webContentLink,size',

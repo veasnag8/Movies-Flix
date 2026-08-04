@@ -21,9 +21,9 @@ const form = reactive({
   poster_url: '',
   banner_url: '',
   category: '',
-  year: '',
-  duration: '',
-  rating: '',
+  year: new Date().getFullYear().toString(),
+  duration: '2h',
+  rating: '8.0',
   language: 'Khmer',
   quality: '1080p',
   drive_video_id: '',
@@ -34,6 +34,23 @@ const form = reactive({
   poster: null,
   banner: null,
 })
+
+const years = Array.from({ length: 40 }, (_, i) => String(new Date().getFullYear() - i))
+const durations = [
+  '30m', '45m', '1h', '1h 15m', '1h 30m', '1h 45m',
+  '2h', '2h 15m', '2h 30m', '2h 45m', '3h', '3h 30m',
+]
+const ratings = ['10', '9.5', '9.0', '8.5', '8.0', '7.5', '7.0', '6.5', '6.0', '5.5', '5.0', '4.0', '3.0']
+const qualities = ['4K', '1080p', '720p', '480p']
+const languages = ['Khmer', 'English', 'Chinese', 'Thai', 'Korean', 'Japanese', 'Other']
+
+function formatSaveError(e) {
+  const data = e.response?.data
+  if (data?.errors) {
+    return Object.values(data.errors).flat().join(' ')
+  }
+  return data?.error || data?.message || e.message || 'Save failed'
+}
 
 function imageSrc(url) {
   if (!url) return ''
@@ -60,9 +77,9 @@ function resetForm() {
     poster_url: '',
     banner_url: '',
     category: '',
-    year: '',
-    duration: '',
-    rating: '',
+    year: new Date().getFullYear().toString(),
+    duration: '2h',
+    rating: '8.0',
     language: 'Khmer',
     quality: '1080p',
     drive_video_id: '',
@@ -207,16 +224,16 @@ async function saveMovie() {
 
     if (editingId.value) {
       data.append('_method', 'PUT')
-      await api.post(`/admin/movie/${editingId.value}`, data)
+      await api.post(`/admin/movie/${editingId.value}`, data, { timeout: 600000 })
       message.value = 'បានធ្វើបច្ចុប្បន្នភាព / Movie updated.'
     } else {
-      await api.post('/admin/movie', data)
+      await api.post('/admin/movie', data, { timeout: 600000 })
       message.value = 'បានបន្ថែមភាពយន្ត / Movie created.'
     }
     resetForm()
     await load()
   } catch (e) {
-    error.value = e.response?.data?.message || e.response?.data?.error || 'Save failed'
+    error.value = formatSaveError(e)
   } finally {
     saving.value = false
     saveStep.value = ''
@@ -286,11 +303,26 @@ onMounted(load)
         <option value="">Select category / ជ្រើសប្រភេទ</option>
         <option v-for="c in categories" :key="c.id" :value="c.name">{{ c.name }}</option>
       </select>
-      <input v-model="form.year" placeholder="Year / ឆ្នាំ" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
-      <input v-model="form.duration" placeholder="Duration e.g. 2h 10m" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
-      <input v-model="form.rating" placeholder="Rating / ពិន្ទុ" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
-      <input v-model="form.language" placeholder="Language" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
-      <input v-model="form.quality" placeholder="Quality" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
+      <select v-model="form.year" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving">
+        <option value="">Year / ឆ្នាំ</option>
+        <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+      </select>
+      <select v-model="form.duration" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving">
+        <option value="">Duration / រយៈពេល</option>
+        <option v-if="form.duration && !durations.includes(form.duration)" :value="form.duration">{{ form.duration }}</option>
+        <option v-for="d in durations" :key="d" :value="d">{{ d }}</option>
+      </select>
+      <select v-model="form.rating" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving">
+        <option value="">Rating / ពិន្ទុ</option>
+        <option v-if="form.rating && !ratings.includes(form.rating)" :value="form.rating">{{ form.rating }}</option>
+        <option v-for="r in ratings" :key="r" :value="r">{{ r }}</option>
+      </select>
+      <select v-model="form.language" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving">
+        <option v-for="l in languages" :key="l" :value="l">{{ l }}</option>
+      </select>
+      <select v-model="form.quality" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving">
+        <option v-for="q in qualities" :key="q" :value="q">{{ q }}</option>
+      </select>
       <input v-model="form.drive_video_id" placeholder="Drive Video ID (optional)" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
       <input v-model="form.trailer_url" placeholder="Trailer URL" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />
       <input v-model="form.subtitle_url" placeholder="Subtitle .vtt URL" class="rounded border border-white/10 bg-black px-3 py-2" :disabled="saving" />

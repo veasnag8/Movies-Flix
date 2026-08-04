@@ -5,6 +5,15 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Allow large video uploads (Render free still has request time limits)
+RUN printf '%s\n' \
+    'upload_max_filesize = 512M' \
+    'post_max_size = 520M' \
+    'memory_limit = 512M' \
+    'max_execution_time = 600' \
+    'max_input_time = 600' \
+    > /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www

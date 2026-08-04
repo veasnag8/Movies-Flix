@@ -42,13 +42,16 @@ class MovieAdminController extends Controller
             'trailer_url' => 'nullable|string',
             'subtitle_url' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,draft',
-            'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime|max:512000',
+            'video' => 'nullable|file|max:524288',
             'poster' => 'nullable|image|max:10240',
             'banner' => 'nullable|image|max:10240',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         $data = $validator->validated();
@@ -74,9 +77,11 @@ class MovieAdminController extends Controller
 
             return response()->json(['data' => $movie, 'message' => 'Movie created.'], 201);
         } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'message' => 'Failed to create movie.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -99,13 +104,16 @@ class MovieAdminController extends Controller
             'trailer_url' => 'nullable|string',
             'subtitle_url' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,draft',
-            'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime|max:512000',
+            'video' => 'nullable|file|max:524288',
             'poster' => 'nullable|image|max:10240',
             'banner' => 'nullable|image|max:10240',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         $data = $validator->validated();
@@ -140,9 +148,11 @@ class MovieAdminController extends Controller
 
             return response()->json(['data' => $movie, 'message' => 'Movie updated.']);
         } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'message' => 'Failed to update movie.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -173,11 +183,14 @@ class MovieAdminController extends Controller
     public function uploadVideo(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'video' => 'required|file|mimetypes:video/mp4,video/webm,video/quicktime|max:512000',
+            'video' => 'required|file|max:524288',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         try {
@@ -185,9 +198,11 @@ class MovieAdminController extends Controller
 
             return response()->json(['data' => $uploaded]);
         } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'message' => 'Video upload failed.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
