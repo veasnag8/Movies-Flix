@@ -1,0 +1,9 @@
+{
+  "name": "movies-flix",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && php artisan serve",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "echo Run backend and frontend in two terminals: npm run backend / npm run frontend"
+  }
+}

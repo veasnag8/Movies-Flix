@@ -1,0 +1,3 @@
+id,name,email,password,role,avatar,created_at
+1,Admin,admin@moviesflix.test,$2y$10$cjHdCpQBYJgjp2I0X2y6GuNPCYjk5lC1Suo7W38XgndYH6t0s6NVW,admin,,2026-01-01 00:00:00
+2,Demo User,user@moviesflix.test,$2y$10$x2BixfSzdXYRqhPk24KV1.Na0WPseM8UFRJbumf4ccTNM1ZXooNRO,user,,2026-01-02 00:00:00
