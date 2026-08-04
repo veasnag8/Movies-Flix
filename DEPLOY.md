@@ -30,6 +30,10 @@ Repo: https://github.com/veasnag8/Movies-Flix
 6. Check health: `https://YOUR-API.onrender.com/up`
 
 > Free Render services sleep after idle time. First request may take ~30–60s.
+>
+> This repo includes `.github/workflows/keep-render-awake.yml` which pings
+> `https://movies-flix-kh.onrender.com/up` every 10 minutes to reduce cold starts.
+> Enable GitHub Actions on the repo (Actions tab → allow workflows).
 
 ---
 
