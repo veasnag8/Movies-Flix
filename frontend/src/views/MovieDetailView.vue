@@ -66,7 +66,7 @@ const isFavorite = computed(() =>
         />
 
         <div class="fade-up">
-          <h1 class="font-display text-5xl tracking-wide md:text-6xl">{{ movie.title }}</h1>
+          <h1 class="hero-title text-3xl sm:text-5xl md:text-6xl">{{ movie.title }}</h1>
           <div class="mt-3 flex flex-wrap gap-3 text-sm text-white/70">
             <span class="text-green-400">★ {{ movie.rating }}</span>
             <span>{{ movie.year }}</span>
@@ -79,9 +79,9 @@ const isFavorite = computed(() =>
             {{ movie.description }}
           </p>
 
-          <div class="mt-8 flex flex-wrap gap-3">
+          <div class="mt-6 flex w-full flex-col gap-2 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3">
             <button
-              class="rounded bg-flix-red px-6 py-3 text-sm font-bold uppercase tracking-wide hover:bg-flix-red-dark"
+              class="rounded bg-flix-red px-6 py-3 text-sm font-bold hover:bg-flix-red-dark"
               @click="watchNow"
             >
               {{ kh.watchNow }}
@@ -97,7 +97,7 @@ const isFavorite = computed(() =>
               :href="movie.trailer_url"
               target="_blank"
               rel="noopener"
-              class="rounded border border-flix-gold/40 px-6 py-3 text-sm font-semibold text-flix-gold-soft hover:bg-flix-gold/10"
+              class="rounded border border-flix-gold/40 px-6 py-3 text-center text-sm font-semibold text-flix-gold-soft hover:bg-flix-gold/10"
             >
               {{ kh.trailer }}
             </a>

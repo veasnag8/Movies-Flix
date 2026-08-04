@@ -23,11 +23,11 @@ async function submit() {
   <div class="relative flex min-h-screen items-center justify-center px-4">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(200,16,46,0.35),transparent_45%),linear-gradient(#080706,#1a0a0c)]" />
     <form
-      class="kh-panel relative z-10 w-full max-w-md rounded-sm bg-black/80 p-8 backdrop-blur"
+      class="kh-panel relative z-10 w-full max-w-md rounded-sm bg-black/80 p-5 backdrop-blur sm:p-8"
       @submit.prevent="submit"
     >
       <div class="brand-mark">
-        <span class="latin text-4xl">{{ kh.brand }}</span>
+        <span class="latin text-3xl sm:text-4xl">{{ kh.brand }}</span>
         <span class="khmer">{{ kh.brandKh }}</span>
       </div>
       <div class="gold-line mt-3" />

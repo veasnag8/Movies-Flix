@@ -13,8 +13,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 pb-16 pt-24 md:px-8">
-    <h1 class="font-display text-4xl tracking-wide text-flix-gold-soft">{{ kh.myList }}</h1>
+  <div class="mx-auto max-w-7xl px-4 pb-16 pt-20 sm:pt-24 md:px-8">
+    <h1 class="font-display text-3xl tracking-wide text-flix-gold-soft sm:text-4xl">{{ kh.myList }}</h1>
     <div class="gold-line mt-2" />
 
     <section class="mt-10">

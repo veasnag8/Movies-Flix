@@ -56,17 +56,17 @@ watch(
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 pb-16 pt-24 md:px-8">
-    <h1 class="font-display text-4xl tracking-wide text-flix-gold-soft">{{ kh.browse }}</h1>
+  <div class="mx-auto max-w-7xl px-4 pb-16 pt-20 sm:pt-24 md:px-8">
+    <h1 class="font-display text-3xl tracking-wide text-flix-gold-soft sm:text-4xl">{{ kh.browse }}</h1>
     <div class="gold-line mt-2" />
-    <form class="mt-6 flex gap-3" @submit.prevent="runSearch">
+    <form class="mt-5 flex flex-col gap-3 sm:mt-6 sm:flex-row" @submit.prevent="runSearch">
       <input
         v-model="query"
         type="search"
         :placeholder="kh.searchPlaceholder"
         class="w-full rounded border border-flix-gold/20 bg-neutral-900 px-4 py-3 outline-none focus:border-flix-gold"
       />
-      <button class="rounded bg-flix-red px-5 py-3 font-semibold hover:bg-flix-red-dark">
+      <button class="rounded bg-flix-red px-5 py-3 font-semibold hover:bg-flix-red-dark sm:shrink-0">
         {{ kh.search }}
       </button>
     </form>
