@@ -25,7 +25,7 @@ async function submit() {
       class="relative z-10 w-full max-w-md rounded-sm bg-black/75 p-8 shadow-2xl backdrop-blur"
       @submit.prevent="submit"
     >
-      <h1 class="font-display text-4xl text-flix-red">MOVIES FLIX</h1>
+      <h1 class="font-display text-4xl text-flix-red">MOVIES FLIX KH</h1>
       <p class="mt-2 text-sm text-white/60">Sign in to watch and continue your list</p>
 
       <label class="mt-8 block text-sm text-white/70">Email</label>
@@ -55,7 +55,7 @@ async function submit() {
       </button>
 
       <p class="mt-6 text-sm text-white/60">
-        New to Movies Flix?
+        New to Movies Flix KH?
         <RouterLink to="/register" class="text-white hover:underline">Sign up now</RouterLink>
       </p>
     </form>

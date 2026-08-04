@@ -1,4 +1,4 @@
-# Movies Flix — Installation Guide
+# Movies Flix KH — Installation Guide
 
 ## Requirements
 
@@ -128,7 +128,7 @@ php artisan key:generate
 Edit `.env`:
 
 ```env
-APP_NAME="Movies Flix"
+APP_NAME="Movies Flix KH"
 APP_URL=http://localhost:8000
 FRONTEND_URL=http://localhost:5173
 APP_DEMO_MODE=false

@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: movies-flix-kh-api
+    runtime: php
+    plan: free
+    rootDir: backend
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      touch database/database.sqlite
+      php artisan migrate --force
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: Movies Flix KH
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_DEMO_MODE
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_SHEET_ID
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false

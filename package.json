@@ -1,5 +1,5 @@
 {
-  "name": "movies-flix",
+  "name": "movies-flix-kh",
   "private": true,
   "scripts": {
     "backend": "cd backend && php artisan serve",

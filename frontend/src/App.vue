@@ -24,7 +24,7 @@ async function onLogout() {
     >
       <div class="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4 md:px-8">
         <RouterLink to="/" class="font-display text-3xl tracking-wide text-flix-red md:text-4xl">
-          MOVIES FLIX
+          MOVIES FLIX KH
         </RouterLink>
 
         <nav class="hidden items-center gap-5 text-sm text-white/80 md:flex">

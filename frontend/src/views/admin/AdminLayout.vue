@@ -15,7 +15,7 @@ async function logout() {
   <div class="min-h-screen bg-neutral-950 text-white md:grid md:grid-cols-[240px_1fr]">
     <aside class="border-b border-white/10 bg-black md:min-h-screen md:border-b-0 md:border-r">
       <div class="px-5 py-6">
-        <RouterLink to="/" class="font-display text-3xl text-flix-red">MOVIES FLIX</RouterLink>
+        <RouterLink to="/" class="font-display text-3xl text-flix-red">MOVIES FLIX KH</RouterLink>
         <p class="mt-1 text-xs uppercase tracking-widest text-white/40">Admin Panel</p>
       </div>
       <nav class="flex gap-2 overflow-x-auto px-3 pb-4 md:flex-col md:gap-1">

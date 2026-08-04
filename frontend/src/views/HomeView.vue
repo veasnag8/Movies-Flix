@@ -20,7 +20,7 @@ onMounted(async () => {
 <template>
   <div>
     <div v-if="movies.loading && !movies.meta.hero" class="flex min-h-screen items-center justify-center text-white/60">
-      Loading Movies Flix...
+      Loading Movies Flix KH...
     </div>
 
     <template v-else>
@@ -30,7 +30,7 @@ onMounted(async () => {
       />
       <section v-else class="flex min-h-[70vh] items-center justify-center bg-gradient-to-b from-neutral-900 to-flix-dark px-4 text-center">
         <div>
-          <h1 class="font-display text-6xl text-flix-red">MOVIES FLIX</h1>
+          <h1 class="font-display text-6xl text-flix-red">MOVIES FLIX KH</h1>
           <p class="mt-4 text-white/70">Connect Google Sheets to load your catalog.</p>
         </div>
       </section>

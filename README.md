@@ -1,9 +1,9 @@
-# Movies Flix
+# Movies Flix KH
 
 Netflix-style movie streaming website powered by:
 
-- **Backend:** Laravel 12 + PHP 8.2/8.3 + Laravel Sanctum
-- **Frontend:** Vue 3 + Vite + Tailwind CSS + Pinia + Axios
+- **Backend:** Laravel 12 + PHP 8.2/8.3 + Laravel Sanctum (**Render**)
+- **Frontend:** Vue 3 + Vite + Tailwind CSS + Pinia + Axios (**Vercel**)
 - **Database:** Google Sheets API (Movies, Users, Categories, WatchHistory, Favorites)
 - **Storage:** Google Drive API (videos, posters, banners)
 
@@ -11,7 +11,16 @@ SQLite is used only for Laravel internals (sessions, cache, Sanctum API tokens).
 
 ---
 
-## Quick Start
+## Deploy online (no local)
+
+See **[DEPLOY.md](DEPLOY.md)** for step-by-step:
+
+1. Backend → [Render](https://render.com) (`render.yaml`)
+2. Frontend → [Vercel](https://vercel.com) (`frontend/` + `VITE_API_URL`)
+
+---
+
+## Quick Start (optional local)
 
 ### 1. Backend
 
@@ -81,13 +90,14 @@ GOOGLE_DRIVE_FOLDER_ID=
 ## Project Structure
 
 ```
-Movies Flix/
-├── backend/                 Laravel API
+Movies Flix KH/
+├── backend/                 Laravel API (Render)
 │   ├── app/Services/        GoogleSheetService, GoogleDriveService
 │   ├── app/Http/Controllers/Api/
 │   └── routes/api.php
-├── frontend/                Vue 3 SPA
+├── frontend/                Vue 3 SPA (Vercel)
 │   └── src/views/           Home, Detail, Player, Admin
+├── render.yaml              Render blueprint
 └── docs/
     └── google-sheet-template/   CSV templates for each sheet
 ```
