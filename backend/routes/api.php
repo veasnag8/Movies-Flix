@@ -9,26 +9,35 @@ use App\Http\Controllers\Api\UserLibraryController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:api-auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
-Route::get('/movies', [MovieController::class, 'index']);
-Route::get('/movies/{id}', [MovieController::class, 'show']);
-Route::get('/search', [MovieController::class, 'search']);
-Route::get('/categories', [MovieController::class, 'categories']);
+Route::middleware('throttle:api-public')->group(function () {
+    Route::get('/movies', [MovieController::class, 'index']);
+    Route::get('/movies/{id}', [MovieController::class, 'show']);
+    Route::get('/categories', [MovieController::class, 'categories']);
+});
+
+Route::middleware('throttle:api-search')->group(function () {
+    Route::get('/search', [MovieController::class, 'search']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::middleware('throttle:api-user')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
 
-    Route::get('/favorites', [UserLibraryController::class, 'favorites']);
-    Route::post('/favorites', [UserLibraryController::class, 'addFavorite']);
-    Route::delete('/favorites/{movieId}', [UserLibraryController::class, 'removeFavorite']);
+        Route::get('/favorites', [UserLibraryController::class, 'favorites']);
+        Route::post('/favorites', [UserLibraryController::class, 'addFavorite']);
+        Route::delete('/favorites/{movieId}', [UserLibraryController::class, 'removeFavorite']);
 
-    Route::get('/watch-history', [UserLibraryController::class, 'watchHistory']);
-    Route::post('/watch-history', [UserLibraryController::class, 'saveProgress']);
+        Route::get('/watch-history', [UserLibraryController::class, 'watchHistory']);
+        Route::post('/watch-history', [UserLibraryController::class, 'saveProgress']);
+    });
 
-    Route::prefix('admin')->middleware(EnsureUserIsAdmin::class)->group(function () {
+    Route::prefix('admin')->middleware([EnsureUserIsAdmin::class, 'throttle:api-admin'])->group(function () {
         Route::get('/movies', [MovieAdminController::class, 'index']);
         Route::post('/movie', [MovieAdminController::class, 'store']);
         Route::put('/movie/{id}', [MovieAdminController::class, 'update']);
