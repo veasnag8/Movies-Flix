@@ -51,6 +51,7 @@ const progressPercent = computed(() => {
   return Math.min(100, (currentTime.value / duration.value) * 100)
 })
 
+const hasTiming = computed(() => duration.value > 0)
 const timeLabel = computed(() => formatTime(currentTime.value))
 const durationLabel = computed(() => formatTime(duration.value))
 
@@ -292,8 +293,10 @@ onBeforeUnmount(() => {
 
                     <div class="mb-2 flex items-center gap-2 text-xs text-white/75 sm:text-sm">
                       <p class="truncate font-semibold text-white">{{ movie.title }}</p>
-                      <span class="shrink-0 text-white/30">•</span>
-                      <p class="shrink-0">{{ timeLabel }} / {{ durationLabel }}</p>
+                      <span class="hidden shrink-0 text-white/30 sm:inline">•</span>
+                      <p class="shrink-0">
+                        {{ hasTiming ? `${timeLabel} / ${durationLabel}` : 'Loading time...' }}
+                      </p>
                     </div>
 
                     <input
@@ -307,7 +310,7 @@ onBeforeUnmount(() => {
                       @input="seekTo"
                     />
 
-                    <div class="flex items-center gap-2 text-sm">
+                    <div class="watch-controls flex items-center gap-2 text-sm">
                       <button class="watch-icon-btn" @click="togglePlay" :aria-label="isPlaying ? 'Pause' : 'Play'">
                         <span v-if="isPlaying">❚❚</span>
                         <span v-else>▶</span>
@@ -365,11 +368,11 @@ onBeforeUnmount(() => {
             <div class="mt-3 grid gap-3 text-sm text-white/75 sm:grid-cols-2">
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Current time</p>
-                <p class="mt-1 text-lg font-semibold text-white">{{ timeLabel }}</p>
+                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? timeLabel : 'Loading...' }}</p>
               </div>
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Duration</p>
-                <p class="mt-1 text-lg font-semibold text-white">{{ durationLabel }}</p>
+                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? durationLabel : 'Loading...' }}</p>
               </div>
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Speed</p>
