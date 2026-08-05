@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\MovieAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\StreamController;
 use App\Http\Controllers\Api\UserLibraryController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::middleware('throttle:api-public')->group(function () {
 Route::middleware('throttle:api-search')->group(function () {
     Route::get('/search', [MovieController::class, 'search']);
 });
+
+Route::get('/stream/{id}', [StreamController::class, 'show'])->middleware('throttle:api-public');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('throttle:api-user')->group(function () {

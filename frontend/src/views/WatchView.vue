@@ -20,8 +20,10 @@ const selectedQuality = ref('auto')
 const speedMenuOpen = ref(false)
 const qualityMenuOpen = ref(false)
 const videoError = ref('')
+const metadataReady = ref(false)
 let hideTimer = null
 let saveTimer = null
+let metadataTimer = null
 
 const movie = computed(() => store.current)
 
@@ -30,21 +32,16 @@ const isDirectMp4 = computed(() => {
   return url.includes('.mp4') || url.includes('gtv-videos-bucket')
 })
 
-const isDriveVideo = computed(() => {
-  const url = movie.value?.stream_url || movie.value?.embed_url || ''
-  return url.includes('drive.google.com')
-})
-
 const playerUrl = computed(() => {
   if (!movie.value) return ''
   if (isDirectMp4.value) return movie.value.stream_url
+  if (movie.value.drive_video_id) return movie.value.embed_url || ''
   if (movie.value.embed_url) return movie.value.embed_url
-  if (movie.value.stream_url && !isDriveVideo.value) return movie.value.stream_url
   return ''
 })
 
 const isComingSoon = computed(() => movie.value && !playerUrl.value)
-const canUseVideoTag = computed(() => Boolean(movie.value?.stream_url) && (isDirectMp4.value || !isDriveVideo.value))
+const canUseVideoTag = computed(() => Boolean(movie.value?.stream_url) && isDirectMp4.value)
 
 const progressPercent = computed(() => {
   if (!duration.value) return 0
@@ -84,7 +81,9 @@ function revealControls() {
 function onLoadedMetadata() {
   if (!videoRef.value) return
   videoError.value = ''
+  metadataReady.value = true
   duration.value = videoRef.value.duration || 0
+  clearTimeout(metadataTimer)
 
   const history = store.continueWatching.find(
     (item) => String(item.movie_id) === String(route.params.id)
@@ -177,11 +176,6 @@ function onBodyClick() {
 }
 
 function onVideoError() {
-  if (movie.value?.embed_url && !videoError.value) {
-    videoError.value = 'Browser playback failed. Trying the Drive preview instead.'
-    return
-  }
-
   videoError.value = 'This video cannot be played directly in the browser. Please check the Drive sharing settings or upload the file again through the admin panel.'
   isPlaying.value = false
   showControls.value = true
@@ -204,6 +198,13 @@ onMounted(async () => {
   await nextTick()
   if (videoRef.value) {
     videoRef.value.playbackRate = playbackRate.value
+    metadataReady.value = false
+    clearTimeout(metadataTimer)
+    metadataTimer = setTimeout(() => {
+      if (!metadataReady.value && movie.value?.stream_url) {
+        videoError.value = 'Video is taking too long to load. Tap Play, or check if the Drive file is public and playable.'
+      }
+    }, 6000)
   }
 })
 
@@ -211,6 +212,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onBodyClick)
   clearTimeout(hideTimer)
   clearTimeout(saveTimer)
+  clearTimeout(metadataTimer)
   if (videoRef.value && movie.value && !isComingSoon.value) {
     store.saveProgress(movie.value.id, videoRef.value.currentTime || 0)
   }
@@ -261,14 +263,6 @@ onBeforeUnmount(() => {
               />
             </video>
 
-            <iframe
-              v-else-if="playerUrl"
-              class="h-full w-full border-0"
-              :src="playerUrl"
-              allow="autoplay; fullscreen"
-              allowfullscreen
-            />
-
             <div v-else class="flex h-full items-center justify-center bg-gradient-to-br from-black via-neutral-950 to-black text-white/70">
               Coming Soon
             </div>
@@ -295,7 +289,7 @@ onBeforeUnmount(() => {
                       <p class="truncate font-semibold text-white">{{ movie.title }}</p>
                       <span class="hidden shrink-0 text-white/30 sm:inline">•</span>
                       <p class="shrink-0">
-                        {{ hasTiming ? `${timeLabel} / ${durationLabel}` : 'Loading time...' }}
+                        {{ hasTiming ? `${timeLabel} / ${durationLabel}` : 'Ready to play' }}
                       </p>
                     </div>
 
@@ -368,11 +362,11 @@ onBeforeUnmount(() => {
             <div class="mt-3 grid gap-3 text-sm text-white/75 sm:grid-cols-2">
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Current time</p>
-                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? timeLabel : 'Loading...' }}</p>
+                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? timeLabel : 'Ready' }}</p>
               </div>
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Duration</p>
-                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? durationLabel : 'Loading...' }}</p>
+                <p class="mt-1 text-lg font-semibold text-white">{{ hasTiming ? durationLabel : 'Ready' }}</p>
               </div>
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Speed</p>

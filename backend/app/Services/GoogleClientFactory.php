@@ -61,4 +61,12 @@ class GoogleClientFactory
     {
         return new Drive($this->make());
     }
+
+    public function accessToken(): string
+    {
+        $client = $this->make();
+        $token = $client->getAccessToken();
+
+        return (string) ($token['access_token'] ?? '');
+    }
 }
