@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
@@ -13,8 +13,13 @@ function toThumb(url) {
   if (!url) return ''
   const driveId =
     url.match(/[?&]id=([^&]+)/)?.[1] ||
-    url.match(/\/d\/([^/]+)/)?.[1]
+    url.match(/\/d\/([^/]+)/)?.[1] ||
+    url.match(/thumbnail\/?[^?]*[?&]id=([^&]+)/)?.[1] ||
+    url.match(/uc\?[^?]*[?&]id=([^&]+)/)?.[1]
   if (driveId && url.includes('drive.google.com')) {
+    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w400`
+  }
+  if (driveId && url.includes('googleusercontent.com')) {
     return `https://drive.google.com/thumbnail?id=${driveId}&sz=w400`
   }
   return url
@@ -22,6 +27,14 @@ function toThumb(url) {
 
 const thumb = computed(() => toThumb(props.movie.poster_url || props.movie.banner_url || ''))
 const hasVideo = computed(() => Boolean(props.movie.drive_video_id || props.movie.stream_url || props.movie.embed_url))
+const thumbFailed = ref(false)
+
+watch(
+  () => thumb.value,
+  () => {
+    thumbFailed.value = false
+  }
+)
 </script>
 
 <template>
@@ -31,11 +44,12 @@ const hasVideo = computed(() => Boolean(props.movie.drive_video_id || props.movi
   >
     <div class="aspect-[2/3] overflow-hidden bg-neutral-900">
       <img
-        v-if="thumb"
+        v-if="thumb && !thumbFailed"
         :src="thumb"
         :alt="movie.title"
         class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
         loading="lazy"
+        @error="thumbFailed = true"
       />
       <div v-else class="flex h-full items-center justify-center bg-neutral-800 p-2 text-center text-[11px] leading-snug text-white/60 sm:p-3 sm:text-sm">
         {{ movie.title }}

@@ -30,13 +30,21 @@ const isDirectMp4 = computed(() => {
   return url.includes('.mp4') || url.includes('gtv-videos-bucket')
 })
 
+const isDriveVideo = computed(() => {
+  const url = movie.value?.stream_url || movie.value?.embed_url || ''
+  return url.includes('drive.google.com')
+})
+
 const playerUrl = computed(() => {
   if (!movie.value) return ''
-  return movie.value.stream_url || movie.value.embed_url || ''
+  if (isDirectMp4.value) return movie.value.stream_url
+  if (movie.value.embed_url) return movie.value.embed_url
+  if (movie.value.stream_url && !isDriveVideo.value) return movie.value.stream_url
+  return ''
 })
 
 const isComingSoon = computed(() => movie.value && !playerUrl.value)
-const canUseVideoTag = computed(() => Boolean(movie.value?.stream_url))
+const canUseVideoTag = computed(() => Boolean(movie.value?.stream_url) && (isDirectMp4.value || !isDriveVideo.value))
 
 const progressPercent = computed(() => {
   if (!duration.value) return 0
@@ -168,6 +176,11 @@ function onBodyClick() {
 }
 
 function onVideoError() {
+  if (movie.value?.embed_url && !videoError.value) {
+    videoError.value = 'Browser playback failed. Trying the Drive preview instead.'
+    return
+  }
+
   videoError.value = 'This video cannot be played directly in the browser. Please check the Drive sharing settings or upload the file again through the admin panel.'
   isPlaying.value = false
   showControls.value = true
@@ -246,6 +259,14 @@ onBeforeUnmount(() => {
                 default
               />
             </video>
+
+            <iframe
+              v-else-if="playerUrl"
+              class="h-full w-full border-0"
+              :src="playerUrl"
+              allow="autoplay; fullscreen"
+              allowfullscreen
+            />
 
             <div v-else class="flex h-full items-center justify-center bg-gradient-to-br from-black via-neutral-950 to-black text-white/70">
               Coming Soon
