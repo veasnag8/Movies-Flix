@@ -19,6 +19,7 @@ const qualityLabel = ref('Auto')
 const selectedQuality = ref('auto')
 const speedMenuOpen = ref(false)
 const qualityMenuOpen = ref(false)
+const videoError = ref('')
 let hideTimer = null
 let saveTimer = null
 
@@ -31,11 +32,11 @@ const isDirectMp4 = computed(() => {
 
 const playerUrl = computed(() => {
   if (!movie.value) return ''
-  if (isDirectMp4.value) return movie.value.stream_url
-  return movie.value.embed_url || movie.value.stream_url
+  return movie.value.stream_url || movie.value.embed_url || ''
 })
 
 const isComingSoon = computed(() => movie.value && !playerUrl.value)
+const canUseVideoTag = computed(() => Boolean(movie.value?.stream_url))
 
 const progressPercent = computed(() => {
   if (!duration.value) return 0
@@ -73,6 +74,7 @@ function revealControls() {
 
 function onLoadedMetadata() {
   if (!videoRef.value) return
+  videoError.value = ''
   duration.value = videoRef.value.duration || 0
 
   const history = store.continueWatching.find(
@@ -97,6 +99,7 @@ function onTimeUpdate() {
 
 function onPlay() {
   isPlaying.value = true
+  videoError.value = ''
   revealControls()
 }
 
@@ -164,6 +167,12 @@ function onBodyClick() {
   closeMenus()
 }
 
+function onVideoError() {
+  videoError.value = 'This video cannot be played directly in the browser. Please check the Drive sharing settings or upload the file again through the admin panel.'
+  isPlaying.value = false
+  showControls.value = true
+}
+
 async function onWheel(event) {
   if (!videoRef.value) return
   skip(event.deltaY < 0 ? 5 : -5)
@@ -215,7 +224,7 @@ onBeforeUnmount(() => {
         <div ref="playerShellRef" class="overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0b] shadow-2xl shadow-black/60">
           <div class="relative aspect-video w-full bg-black" @mousemove="revealControls" @touchstart="revealControls" @wheel.prevent="onWheel">
             <video
-              v-if="isDirectMp4"
+              v-if="canUseVideoTag"
               ref="videoRef"
               class="h-full w-full object-contain"
               :src="playerUrl"
@@ -226,6 +235,7 @@ onBeforeUnmount(() => {
               @timeupdate="onTimeUpdate"
               @play="onPlay"
               @pause="onPause"
+              @error="onVideoError"
             >
               <track
                 v-if="movie.subtitle_url"
@@ -237,16 +247,15 @@ onBeforeUnmount(() => {
               />
             </video>
 
-            <iframe
-              v-else-if="playerUrl"
-              class="h-full w-full border-0"
-              :src="playerUrl"
-              allow="autoplay; fullscreen"
-              allowfullscreen
-            />
-
             <div v-else class="flex h-full items-center justify-center bg-gradient-to-br from-black via-neutral-950 to-black text-white/70">
               Coming Soon
+            </div>
+
+            <div
+              v-if="videoError"
+              class="absolute inset-x-0 bottom-[4.5rem] mx-auto max-w-3xl rounded-xl border border-red-500/30 bg-black/85 px-4 py-3 text-sm text-red-200 shadow-2xl shadow-black/40"
+            >
+              {{ videoError }}
             </div>
 
             <div
