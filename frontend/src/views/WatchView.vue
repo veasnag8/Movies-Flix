@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useMovieStore } from '../stores/movies'
 import { kh } from '../i18n/kh'
@@ -17,6 +17,8 @@ const duration = ref(0)
 const playbackRate = ref(1)
 const qualityLabel = ref('Auto')
 const selectedQuality = ref('auto')
+const speedMenuOpen = ref(false)
+const qualityMenuOpen = ref(false)
 let hideTimer = null
 let saveTimer = null
 
@@ -56,25 +58,26 @@ function formatTime(seconds) {
   return `${mins}:${String(secs).padStart(2, '0')}`
 }
 
+function closeMenus() {
+  speedMenuOpen.value = false
+  qualityMenuOpen.value = false
+}
+
 function revealControls() {
   showControls.value = true
   clearTimeout(hideTimer)
   hideTimer = setTimeout(() => {
-    if (isPlaying.value) {
-      showControls.value = false
-    }
-  }, 2500)
+    if (isPlaying.value) showControls.value = false
+  }, 2200)
 }
 
-async function onLoadedMetadata() {
+function onLoadedMetadata() {
   if (!videoRef.value) return
-
   duration.value = videoRef.value.duration || 0
 
   const history = store.continueWatching.find(
     (item) => String(item.movie_id) === String(route.params.id)
   )
-
   if (history && Number(history.progress) > 0) {
     videoRef.value.currentTime = Number(history.progress)
     currentTime.value = Number(history.progress)
@@ -83,7 +86,6 @@ async function onLoadedMetadata() {
 
 function onTimeUpdate() {
   if (!videoRef.value || !movie.value) return
-
   currentTime.value = videoRef.value.currentTime || 0
   duration.value = videoRef.value.duration || duration.value
 
@@ -127,36 +129,48 @@ function skip(seconds) {
 
 function setSpeed(rate) {
   playbackRate.value = rate
-  if (videoRef.value) {
-    videoRef.value.playbackRate = rate
-  }
+  if (videoRef.value) videoRef.value.playbackRate = rate
+  speedMenuOpen.value = false
 }
 
 function setQuality(label) {
   selectedQuality.value = label
   qualityLabel.value = label === 'auto' ? 'Auto' : label
+  qualityMenuOpen.value = false
+}
+
+function toggleSpeedMenu() {
+  speedMenuOpen.value = !speedMenuOpen.value
+  qualityMenuOpen.value = false
+  revealControls()
+}
+
+function toggleQualityMenu() {
+  qualityMenuOpen.value = !qualityMenuOpen.value
+  speedMenuOpen.value = false
+  revealControls()
 }
 
 async function toggleFullscreen() {
   const el = playerShellRef.value || document.documentElement
   if (document.fullscreenElement) {
     await document.exitFullscreen()
-    return
+  } else {
+    await el.requestFullscreen?.()
   }
+}
 
-  await el.requestFullscreen?.()
+function onBodyClick() {
+  closeMenus()
 }
 
 async function onWheel(event) {
   if (!videoRef.value) return
-  if (event.deltaY < 0) {
-    skip(5)
-  } else {
-    skip(-5)
-  }
+  skip(event.deltaY < 0 ? 5 : -5)
 }
 
 onMounted(async () => {
+  document.addEventListener('click', onBodyClick)
   await store.fetchMovie(route.params.id)
   await store.fetchContinueWatching()
 
@@ -165,23 +179,13 @@ onMounted(async () => {
   }
 
   await nextTick()
-
   if (videoRef.value) {
     videoRef.value.playbackRate = playbackRate.value
   }
 })
 
-watch(
-  () => movie.value,
-  async () => {
-    await nextTick()
-    if (videoRef.value) {
-      videoRef.value.playbackRate = playbackRate.value
-    }
-  }
-)
-
 onBeforeUnmount(() => {
+  document.removeEventListener('click', onBodyClick)
   clearTimeout(hideTimer)
   clearTimeout(saveTimer)
   if (videoRef.value && movie.value && !isComingSoon.value) {
@@ -191,26 +195,24 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[radial-gradient(circle_at_top,#2a0b0e_0%,#080808_42%,#000_100%)] text-white">
+  <div class="min-h-screen bg-black text-white">
     <div v-if="!movie" class="flex min-h-screen items-center justify-center text-white/60">
       {{ kh.loadingShort }}
     </div>
 
     <template v-else>
-      <div class="mx-auto flex max-w-7xl flex-col gap-6 px-3 py-4 sm:px-4 md:px-8 md:py-6">
-        <div class="flex flex-wrap items-center gap-3 text-sm text-white/60">
-          <button class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10" @click="router.back()">
-            Back
-          </button>
-          <RouterLink :to="{ name: 'movie', params: { id: movie.slug || movie.id } }" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10">
+      <div class="mx-auto flex max-w-[1600px] flex-col gap-4 px-2 pb-4 pt-2 sm:px-4 sm:pt-4">
+        <div class="flex items-center gap-2 text-xs text-white/60 sm:text-sm">
+          <button class="rounded-full bg-white/10 px-3 py-1.5 hover:bg-white/20" @click="router.back()">Back</button>
+          <RouterLink :to="{ name: 'movie', params: { id: movie.slug || movie.id } }" class="rounded-full bg-white/10 px-3 py-1.5 hover:bg-white/20">
             Details
           </RouterLink>
-          <span v-if="movie.category" class="rounded-full border border-flix-gold/30 px-3 py-1.5 text-flix-gold-soft">
+          <span v-if="movie.category" class="rounded-full border border-flix-gold/30 bg-flix-gold/10 px-3 py-1.5 text-flix-gold-soft">
             {{ movie.category }}
           </span>
         </div>
 
-        <div ref="playerShellRef" class="overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl shadow-black/40">
+        <div ref="playerShellRef" class="overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0b] shadow-2xl shadow-black/60">
           <div class="relative aspect-video w-full bg-black" @mousemove="revealControls" @touchstart="revealControls" @wheel.prevent="onWheel">
             <video
               v-if="isDirectMp4"
@@ -247,86 +249,90 @@ onBeforeUnmount(() => {
               Coming Soon
             </div>
 
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-300" :class="showControls ? 'opacity-100' : 'opacity-0'">
-              <div class="pointer-events-auto flex h-full flex-col justify-between p-4 sm:p-6">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="max-w-3xl">
-                    <p class="text-xs uppercase tracking-[0.35em] text-flix-gold-soft/80">Now Playing</p>
-                    <h1 class="mt-2 text-2xl font-black uppercase tracking-wide sm:text-4xl">{{ movie.title }}</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-white/65 sm:text-base">
-                      Use the custom player controls below for speed, quality, and fullscreen.
-                    </p>
-                  </div>
-                  <div class="hidden rounded-full border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/80 sm:block">
-                    {{ timeLabel }} / {{ durationLabel }}
-                  </div>
-                </div>
-
-                <div class="space-y-3">
-                  <div class="h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <div class="h-full rounded-full bg-gradient-to-r from-flix-red to-flix-gold" :style="{ width: `${progressPercent}%` }" />
-                  </div>
-
-                  <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <button class="rounded-full bg-white/10 px-3 py-2 text-sm hover:bg-white/20" @click="togglePlay">
-                      {{ isPlaying ? 'Pause' : 'Play' }}
-                    </button>
-                    <button class="rounded-full bg-white/10 px-3 py-2 text-sm hover:bg-white/20" @click="skip(-10)">-10s</button>
-                    <button class="rounded-full bg-white/10 px-3 py-2 text-sm hover:bg-white/20" @click="skip(10)">+10s</button>
-
-                    <div class="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
-                      <span class="text-xs uppercase tracking-widest text-white/50">Speed</span>
-                      <select
-                        :value="playbackRate"
-                        class="bg-transparent text-sm outline-none"
-                        @change="setSpeed(Number($event.target.value))"
-                      >
-                        <option :value="0.75">0.75x</option>
-                        <option :value="1">1x</option>
-                        <option :value="1.25">1.25x</option>
-                        <option :value="1.5">1.5x</option>
-                        <option :value="1.75">1.75x</option>
-                        <option :value="2">2x</option>
-                      </select>
+            <div
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent transition-opacity duration-300"
+              :class="showControls ? 'opacity-100' : 'opacity-0'"
+            >
+              <div class="pointer-events-auto flex h-full flex-col justify-end">
+                <div class="px-2 pb-2 sm:px-3 sm:pb-3">
+                  <div class="rounded-xl bg-black/55 px-3 py-2.5 backdrop-blur-md sm:px-4 sm:py-3">
+                    <div class="mb-2 h-1.5 overflow-hidden rounded-full bg-white/15">
+                      <div class="h-full rounded-full bg-flix-red" :style="{ width: `${progressPercent}%` }" />
                     </div>
 
-                    <div class="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
-                      <span class="text-xs uppercase tracking-widest text-white/50">Quality</span>
-                      <select
-                        :value="selectedQuality"
-                        class="bg-transparent text-sm outline-none"
-                        @change="setQuality($event.target.value)"
-                      >
-                        <option value="auto">Auto</option>
-                        <option v-if="movie.quality" :value="movie.quality">{{ movie.quality }}</option>
-                      </select>
+                    <div class="mb-2 flex items-center gap-2 text-xs text-white/75 sm:text-sm">
+                      <p class="truncate font-semibold text-white">{{ movie.title }}</p>
+                      <span class="shrink-0 text-white/30">•</span>
+                      <p class="shrink-0">{{ timeLabel }} / {{ durationLabel }}</p>
                     </div>
 
-                    <button class="ml-auto rounded-full border border-white/15 bg-flix-gold/10 px-4 py-2 text-sm font-semibold text-flix-gold-soft hover:bg-flix-gold/20" @click="toggleFullscreen">
-                      Fullscreen
-                    </button>
-                  </div>
+                    <input
+                      v-if="isDirectMp4"
+                      class="watch-range mb-2 w-full"
+                      type="range"
+                      min="0"
+                      :max="duration || 0"
+                      step="0.1"
+                      :value="currentTime"
+                      @input="seekTo"
+                    />
 
-                  <input
-                    v-if="isDirectMp4"
-                    class="w-full accent-flix-red"
-                    type="range"
-                    min="0"
-                    :max="duration || 0"
-                    step="0.1"
-                    :value="currentTime"
-                    @input="seekTo"
-                  />
+                    <div class="flex items-center gap-2 text-sm">
+                      <button class="watch-icon-btn" @click="togglePlay" :aria-label="isPlaying ? 'Pause' : 'Play'">
+                        <span v-if="isPlaying">❚❚</span>
+                        <span v-else>▶</span>
+                      </button>
+                      <button class="watch-icon-btn" @click="skip(-10)" aria-label="Back 10 seconds">-10</button>
+                      <button class="watch-icon-btn" @click="skip(10)" aria-label="Forward 10 seconds">+10</button>
+
+                      <div class="relative">
+                        <button class="watch-chip" @click.stop="toggleSpeedMenu">
+                          <span class="watch-label">SPEED</span>
+                          <span class="font-semibold text-white">{{ playbackRate }}x</span>
+                          <span class="watch-caret">⌄</span>
+                        </button>
+                        <div
+                          v-if="speedMenuOpen"
+                          class="watch-menu absolute bottom-[calc(100%+0.45rem)] left-0 z-20 w-32 overflow-hidden"
+                        >
+                          <button v-for="rate in [0.75, 1, 1.25, 1.5, 1.75, 2]" :key="rate" class="menu-item" @click.stop="setSpeed(rate)">
+                            {{ rate }}x
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="relative">
+                        <button class="watch-chip" @click.stop="toggleQualityMenu">
+                          <span class="watch-label">QUALITY</span>
+                          <span class="font-semibold text-white">{{ qualityLabel }}</span>
+                          <span class="watch-caret">⌄</span>
+                        </button>
+                        <div
+                          v-if="qualityMenuOpen"
+                          class="watch-menu absolute bottom-[calc(100%+0.45rem)] left-0 z-20 w-36 overflow-hidden"
+                        >
+                          <button class="menu-item" @click.stop="setQuality('auto')">Auto</button>
+                          <button v-if="movie.quality" class="menu-item" @click.stop="setQuality(movie.quality)">
+                            {{ movie.quality }}
+                          </button>
+                        </div>
+                      </div>
+
+                      <button class="watch-icon-btn ml-auto watch-fullscreen" @click="toggleFullscreen" aria-label="Fullscreen">
+                        ⤢
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
-          <div class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-            <h2 class="text-xl font-bold text-flix-gold-soft">Playback</h2>
-            <div class="mt-3 grid gap-3 text-sm text-white/70 sm:grid-cols-2">
+        <div class="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-5">
+            <h2 class="text-lg font-bold text-flix-gold-soft sm:text-xl">Playback</h2>
+            <div class="mt-3 grid gap-3 text-sm text-white/75 sm:grid-cols-2">
               <div class="rounded-xl bg-black/30 p-4">
                 <p class="text-white/40">Current time</p>
                 <p class="mt-1 text-lg font-semibold text-white">{{ timeLabel }}</p>
@@ -346,9 +352,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-            <h2 class="text-xl font-bold text-flix-gold-soft">Movie Info</h2>
-            <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-white/70">{{ movie.description }}</p>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-5">
+            <h2 class="text-lg font-bold text-flix-gold-soft sm:text-xl">Movie Info</h2>
+            <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-white/70">
+              {{ movie.description }}
+            </p>
             <div class="mt-4 flex flex-wrap gap-2 text-xs">
               <span class="rounded-full border border-white/10 bg-black/30 px-3 py-1">{{ movie.year }}</span>
               <span class="rounded-full border border-white/10 bg-black/30 px-3 py-1">{{ movie.language }}</span>
