@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { kh } from './i18n/kh'
@@ -23,6 +23,16 @@ async function onLogout() {
   await auth.logout()
   router.push({ name: 'home' })
 }
+
+onMounted(async () => {
+  if (!auth.token) return
+
+  try {
+    await auth.fetchMe()
+  } catch {
+    // If the token is invalid, fetchMe() clears the saved session.
+  }
+})
 </script>
 
 <template>

@@ -71,10 +71,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     if (!token.value) return null
-    const { data } = await api.get('/me')
-    user.value = data.user
-    localStorage.setItem('mf_user', JSON.stringify(data.user))
-    return data.user
+    try {
+      const { data } = await api.get('/me')
+      user.value = data.user
+      localStorage.setItem('mf_user', JSON.stringify(data.user))
+      return data.user
+    } catch (e) {
+      if (e.response?.status === 401) {
+        clear()
+      }
+      throw e
+    }
   }
 
   return {
