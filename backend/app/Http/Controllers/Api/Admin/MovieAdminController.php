@@ -56,6 +56,9 @@ class MovieAdminController extends Controller
 
         $data = $validator->validated();
         $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
+        if (! empty($data['drive_video_id'])) {
+            $data['drive_video_id'] = $this->drive->extractFileId($data['drive_video_id']);
+        }
 
         try {
             if ($request->hasFile('video')) {
@@ -117,6 +120,9 @@ class MovieAdminController extends Controller
         }
 
         $data = $validator->validated();
+        if (! empty($data['drive_video_id'] ?? null)) {
+            $data['drive_video_id'] = $this->drive->extractFileId($data['drive_video_id']);
+        }
 
         try {
             $existing = $this->sheets->getMovieById($id);

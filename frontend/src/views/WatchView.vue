@@ -26,6 +26,8 @@ const playerUrl = computed(() => {
   return movie.value.embed_url || movie.value.stream_url
 })
 
+const isComingSoon = computed(() => movie.value && !playerUrl.value)
+
 onMounted(async () => {
   await store.fetchMovie(route.params.id)
   await store.fetchContinueWatching()
@@ -38,7 +40,7 @@ onMounted(async () => {
   }
 
   // For Drive iframe playback, persist a lightweight continue-watching ping
-  if (movie.value && !isDirectMp4.value) {
+  if (movie.value && !isDirectMp4.value && !isComingSoon.value) {
     store.saveProgress(movie.value.id, Number(history?.progress || 1))
   }
 })
@@ -46,7 +48,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   clearTimeout(hideTimer)
   clearTimeout(saveTimer)
-  if (videoRef.value && movie.value) {
+  if (videoRef.value && movie.value && !isComingSoon.value) {
     store.saveProgress(movie.value.id, videoRef.value.currentTime || 0)
   }
 })

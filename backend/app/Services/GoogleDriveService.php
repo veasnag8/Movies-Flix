@@ -13,6 +13,21 @@ class GoogleDriveService
 
     private const CHUNK_BYTES = 1 * 1024 * 1024; // 1MB chunks
 
+    public function extractFileId(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('~(?:/d/|id=)([a-zA-Z0-9_-]+)~', $value, $matches)) {
+            return $matches[1];
+        }
+
+        return $value;
+    }
+
     public function __construct(protected GoogleClientFactory $google)
     {
     }
@@ -146,6 +161,8 @@ class GoogleDriveService
 
     public function getStreamingUrl(string $fileId): string
     {
+        $fileId = $this->extractFileId($fileId);
+
         return 'https://drive.google.com/uc?id='.$fileId.'&export=download';
     }
 
@@ -154,11 +171,15 @@ class GoogleDriveService
      */
     public function getThumbnailUrl(string $fileId, int $width = 800): string
     {
+        $fileId = $this->extractFileId($fileId);
+
         return 'https://drive.google.com/thumbnail?id='.$fileId.'&sz=w'.$width;
     }
 
     public function getEmbedUrl(string $fileId): string
     {
+        $fileId = $this->extractFileId($fileId);
+
         return 'https://drive.google.com/file/d/'.$fileId.'/preview';
     }
 
